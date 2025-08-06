@@ -1,0 +1,532 @@
+---
+openapi: 3.0.0
+info:
+  title: Personal Blog API
+  version: 1.0.0
+  description: A simple API to manage blogs
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /auth/admin/login:
+    post:
+      summary: Authenticate admin and issue JWT
+      security: []
+      tags:
+        - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@example.com
+                password:
+                  type: string
+                  example: password
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: BAD_REQUEST
+                      message:
+                        type: string
+                        example: Invalid Request Format
+                      status:
+                        type: integer
+                        example: 400
+                      details:
+                        type: object
+                        properties:
+                          resource:
+                            type: string
+                            example: Login
+                      trace_id:
+                        type: string
+                        example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+                required:
+                  - error
+        "401":
+          description: Invalid Credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: INVALID_CREDENTIALS
+                      message:
+                        type: string
+                        example: Invalid email or password
+                      status:
+                        type: integer
+                        example: 401
+                      details:
+                        type: object
+                        properties:
+                          resource:
+                            type: string
+                            example: Login
+                      trace_id:
+                        type: string
+                        example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+        "500":
+          $ref: "#/components/responses/500"
+  /auth/admin/logout:
+    post:
+      summary: Logout admin
+      description: >
+        The client should delete the tokens from local storage to complete
+        the logout process
+      security: []
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged out. Please delete your token
+      tags:
+        - infoOnly
+  /admin/dashboard:
+    get:
+      summary: Get all blogs title for admin dashboard
+      security:
+        - bearerAuth: []
+      tags:
+        - admin
+      responses:
+        "200":
+          description: List of blogs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blogs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                          example: 1
+                          readOnly: true
+                        title:
+                          type: string
+                          example: Intro to CS50x
+                      required:
+                        - id
+                        - title
+        "401":
+          description: Invalid or Missing Authentication Token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHENTICATED
+                      message:
+                        type: string
+                        example: Authentication Token is missing, invalid or expired. Please log in
+                          again.
+                      status:
+                        type: integer
+                        example: 401
+                      details:
+                        type: object
+                        properties:
+                          resource:
+                            type: string
+                            example: AdminDashboard
+                      trace_id:
+                        type: string
+                        example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+        "500":
+          $ref: "#/components/responses/500"
+  /articles:
+    post:
+      summary: Create a new article
+      security:
+        - bearerAuth: []
+      tags:
+        - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleWithoutId"
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleWithId"
+        "400":
+           $ref: "#/components/responses/400ArticleBadRequest"
+        "401":
+          description: Invalid or Missing Authentication Token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: UNAUTHENTICATED
+                      message:
+                        type: string
+                        example: Authentication Token is missing, invalid or expired. Please log in
+                          again.
+                      status:
+                        type: integer
+                        example: 401
+                      details:
+                        type: object
+                        properties:
+                          resource:
+                            type: string
+                            example: Article
+                      trace_id:
+                        type: string
+                        example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+        "500":
+          $ref: "#/components/responses/500"
+    get:
+      summary: Get all articles
+      security: []
+      tags:
+        - guest
+      responses:
+        "200":
+          description: Articles retrival
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArticleWithId"
+        "500":
+          $ref: "#/components/responses/500"
+  "/articles/{id}":
+    get:
+      summary: Get an article by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          description: Numeric ID of the article to get
+      security: []
+      tags:
+        - guest
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleWithId"
+        "400":
+          $ref: "#/components/responses/400ArticleBadRequest"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    put:
+      summary: Update an article
+      tags:
+        - admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          description: Numeric ID of the article to update
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleWithoutId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleWithId"
+        "400":
+          $ref: "#/components/responses/400ArticleBadRequest"
+        "401":
+          $ref: "#/components/responses/401ArticleAuthenticationFailure"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      summary: Delete an article
+      tags:
+        - admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          description: Numeric ID of the article to update
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Article deleted
+        "400":
+          $ref: "#/components/responses/400ArticleBadRequest"
+        "401":
+          $ref: "#/components/responses/401ArticleAuthenticationFailure"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    "404":
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: RESOURCE_NOT_FOUND
+                  message:
+                    type: string
+                    example: Article not found
+                  status:
+                    type: integer
+                    example: 404
+                  details:
+                    type: object
+                    properties:
+                      resource:
+                        type: string
+                        example: Article
+                      id:
+                        type: integer
+                        example: 1
+                  trace_id:
+                    type: string
+                    example: e89b1234-a456-42e4-b567-3b42dbd8e
+                required:
+                  - error
+    "500":
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: INTERNAL_SERVER_ERROR
+                  message:
+                    type: string
+                    example: Something went wrong. Please try again later
+                  status:
+                    type: integer
+                    example: 500
+                  trace_id:
+                    type: string
+                    example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+                required:
+                  - error
+    400ArticleBadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: BAD_REQUEST
+                  message:
+                    type: string
+                    example: Id must be a valid number
+                  status:
+                    type: integer
+                    example: 400
+                  details:
+                    type: object
+                    properties:
+                      resource:
+                        type: string
+                        example: Article
+                      id:
+                        type: integer
+                        example: -1
+                  trace_id:
+                    type: string
+                    example: e89b1234-a456-42e4-b567-3b42dbd8e
+                required:
+                  - error
+    401ArticleAuthenticationFailure:
+      description: Invalid or Missing Authentication Token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: UNAUTHENTICATED
+                  message:
+                    type: string
+                    example: Authentication Token is missing, invalid or expired. Please log in
+                      again.
+                  status:
+                    type: integer
+                    example: 401
+                  details:
+                    type: object
+                    properties:
+                      resource:
+                        type: string
+                        example: Article
+                      id:
+                        type: integer
+                        example: 1
+                  trace_id:
+                    type: string
+                    example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+  schemas:
+    ArticleWithoutId:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the article
+          example: Intro to CS50x
+        date:
+          type: string
+          format: date
+          description: Date of creation
+          example: 2022-01-30
+        content:
+          type: string
+          description: Body of the article
+          example: >
+            CS50x: Introduction to Computer Science is Harvard University’s
+            legendary entry-level course that explores foundational concepts in
+            programming, algorithms, data structures, and computational
+            thinking. Designed for majors and non-majors alike, it teaches how
+            to think algorithmically and solve problems efficiently using
+            languages like C, Python, SQL, and JavaScript.
+      required:
+        - title
+        - date
+        - content
+    ArticleWithId:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identifier for an article
+          minimum: 1
+          example: 1
+          readOnly: true
+        title:
+          type: string
+          description: Title of the article
+          example: Intro to CS50x
+        date:
+          type: string
+          format: date
+          description: Date of creation
+          example: 2022-01-30
+        content:
+          type: string
+          description: Body of the article
+          example: >
+            CS50x: Introduction to Computer Science is Harvard University’s
+            legendary entry-level course that explores foundational concepts in
+            programming, algorithms, data structures, and computational
+            thinking. Designed for majors and non-majors alike, it teaches how
+            to think algorithmically and solve problems efficiently using
+            languages like C, Python, SQL, and JavaScript.
+      required:
+        - id
+        - title
+        - date
+        - content
+
