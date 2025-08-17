@@ -96,3 +96,18 @@ func BuildUnauthorizedRequestPayloadInvalidToken(requestUuid uuid.UUID) ([]byte,
 
 	return responseBytes, nil
 }
+
+func ResponseWriter(w http.ResponseWriter, statusCode int, requestID uuid.UUID, payloadBuilder func(uuid2 uuid.UUID) ([]byte, error)) {
+	w.WriteHeader(statusCode)
+	responseBodyBytes, err := payloadBuilder(requestID)
+	if err != nil {
+		logrus.Error("Error creating response Body: ", err)
+		return
+	}
+	SetResponseHeaders(w)
+	_, err = w.Write(responseBodyBytes)
+	if err != nil {
+		logrus.Error("Error writing response: ", err)
+	}
+	return
+}
