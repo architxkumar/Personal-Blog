@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 func SetResponseHeaders(w http.ResponseWriter) {
@@ -49,6 +50,40 @@ func BuildUnauthorizedRequestPayload(requestUuid uuid.UUID) ([]byte, error) {
 	responseBytes, err := json.Marshal(model.ErrorResponse{Error: model.APIError{
 		Code:    "INVALID_CREDENTIALS",
 		Message: "Invalid email or password",
+		Status:  http.StatusUnauthorized,
+		TraceID: requestUuid.String(),
+		Details: &model.ErrorDetails{
+			Resource: "Login",
+		},
+	}})
+	if err != nil {
+		return responseBytes, err
+	}
+
+	return responseBytes, nil
+}
+
+func BuildUnauthorizedRequestPayloadMissingToken(requestUuid uuid.UUID) ([]byte, error) {
+	responseBytes, err := json.Marshal(model.ErrorResponse{Error: model.APIError{
+		Code:    "INVALID_CREDENTIALS",
+		Message: "Missing Token",
+		Status:  http.StatusUnauthorized,
+		TraceID: requestUuid.String(),
+		Details: &model.ErrorDetails{
+			Resource: "Login",
+		},
+	}})
+	if err != nil {
+		return responseBytes, err
+	}
+
+	return responseBytes, nil
+}
+
+func BuildUnauthorizedRequestPayloadInvalidToken(requestUuid uuid.UUID) ([]byte, error) {
+	responseBytes, err := json.Marshal(model.ErrorResponse{Error: model.APIError{
+		Code:    "INVALID_CREDENTIALS",
+		Message: "Invalid Token. Please login again",
 		Status:  http.StatusUnauthorized,
 		TraceID: requestUuid.String(),
 		Details: &model.ErrorDetails{
