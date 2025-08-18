@@ -1,0 +1,17 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "content": "Go makes it easy to build reliable software.",
+    "date": "2025-08-18"
+  },
+  {
+    "id": "6fa459ea-ee8a-3ca4-894e-db77e160355e",
+    "content": "JSON is great for lightweight data storage.",
+    "date": "2025-08-17"
+  },
+  {
+    "id": "9b2d4d1a-7e5a-42b9-aad2-17c5b7b38122",
+    "content": "Keep your Go project structure clean and pragmatic.",
+    "date": "2025-08-16"
+  }
+]
