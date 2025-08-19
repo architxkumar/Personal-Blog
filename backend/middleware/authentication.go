@@ -2,23 +2,24 @@ package middleware
 
 import (
 	"backend/helper"
+	"backend/model"
 	"errors"
 	"net/http"
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang-jwt/jwt/v5/request"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestID := retrieveRequestID(r)
+		requestID := RetrieveRequestID(r)
+		errorDetails := &model.ErrorDetails{Resource: "Dashboard"}
 		tokenString, err := request.BearerExtractor{}.ExtractToken(r)
 		if err != nil {
 			logrus.Error("Missing Authorization Header")
-			helper.ResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayloadMissingToken)
+			helper.ErrorResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayload, errorDetails)
 			return
 		}
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
@@ -30,7 +31,7 @@ func Authentication(next http.Handler) http.Handler {
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 		if err != nil {
 			logrus.Error(err)
-			helper.ResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayloadInvalidToken)
+			helper.ErrorResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayload, errorDetails)
 			return
 		}
 		_, ok := token.Claims.(jwt.MapClaims)
@@ -39,23 +40,8 @@ func Authentication(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		} else {
 			logrus.Info("Token validation failed")
-			helper.ResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayloadInvalidToken)
+			helper.ErrorResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayload, errorDetails)
 			return
 		}
 	})
-}
-
-func retrieveRequestID(r *http.Request) (requestID uuid.UUID) {
-	value := r.Context().Value(requestIDKey)
-	if value != nil {
-		reqID, ok := value.(uuid.UUID)
-		if !ok {
-			logrus.Warn("Type assertion failure on 'requestID'")
-		} else {
-			requestID = reqID
-		}
-	} else {
-		logrus.Warn("Missing requestID key")
-	}
-	return
 }
