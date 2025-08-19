@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang-jwt/jwt/v5/request"
@@ -19,7 +20,15 @@ func Authentication(next http.Handler) http.Handler {
 		tokenString, err := request.BearerExtractor{}.ExtractToken(r)
 		if err != nil {
 			logrus.Error("Missing Authorization Header")
+			w.Header().Set("WWW-Authenticate", "Bearer")
 			helper.ErrorResponseWriter(w, http.StatusUnauthorized, requestID, helper.BuildUnauthorizedRequestPayload, errorDetails)
+			return
+		}
+		jwtSecret := os.Getenv("JWT_SECRET")
+		err = ValidateJWTSecretKey()
+		if err != nil {
+			logrus.Error(err)
+			helper.ErrorResponseWriter(w, http.StatusInternalServerError, requestID, helper.BuildInternalServerErrorPayload, nil)
 			return
 		}
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
@@ -44,4 +53,16 @@ func Authentication(next http.Handler) http.Handler {
 			return
 		}
 	})
+}
+
+func ValidateJWTSecretKey() error {
+	value, ok := os.LookupEnv("JWT_SECRET")
+	if !ok {
+		return errors.New("missing jwt secret key variable")
+	}
+	value = strings.Trim(value, " ")
+	if value == "" {
+		return errors.New("jwt secrete key in empty")
+	}
+	return nil
 }
