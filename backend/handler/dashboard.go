@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,9 +28,12 @@ func DashBoardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logrus.Debug("Contents read successfully")
-	var articlePreviewsDTO []model.ArticlePreviewDTO
+	var articlePreviewsDTO model.ArticlePreviewDTO
 	for _, article := range articles {
-		articlePreviewsDTO = append(articlePreviewsDTO, model.ArticlePreviewDTO{Id: article.Id, Title: article.Title})
+		articlePreviewsDTO.Blogs = append(articlePreviewsDTO.Blogs, struct {
+			Id    uuid.UUID `json:"id"`
+			Title string    `json:"title"`
+		}{Id: article.Id, Title: article.Title})
 	}
 	responseBytes, err := json.Marshal(articlePreviewsDTO)
 	if err != nil {

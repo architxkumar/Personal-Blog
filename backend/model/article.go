@@ -10,6 +10,8 @@ type Article struct {
 }
 
 type ArticlePreviewDTO struct {
-	Id    uuid.UUID `json:"id"`
-	Title string    `json:"title"`
+	Blogs []struct {
+		Id    uuid.UUID `json:"id"`
+		Title string    `json:"title"`
+	} `json:"blogs"`
 }
