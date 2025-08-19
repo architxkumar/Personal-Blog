@@ -42,7 +42,6 @@ func DashBoardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	helper.SetResponseHeaders(w)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(responseBytes)
 	if err != nil {
