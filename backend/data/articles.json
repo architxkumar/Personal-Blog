@@ -1,0 +1,20 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "title": "Understanding Go Concurrency",
+    "content": "Go provides powerful concurrency primitives with goroutines and channels. This article explores patterns and pitfalls.",
+    "date": "2025-08-18"
+  },
+  {
+    "id": "6f9619ff-8b86-d011-b42d-00cf4fc964ff",
+    "title": "Why Clean Code Matters",
+    "content": "Code is read more often than it is written. Writing clean code helps teams maintain and extend systems effectively.",
+    "date": "2025-08-10"
+  },
+  {
+    "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    "title": "Intro to REST APIs",
+    "content": "REST APIs enable communication between clients and servers using stateless requests. This article covers the basics with examples.",
+    "date": "2025-07-30"
+  }
+]

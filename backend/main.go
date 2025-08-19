@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/handler"
+	"backend/middleware"
 	"net/http"
 
 	"github.com/joho/godotenv"
@@ -15,7 +16,8 @@ func main() {
 		logrus.Fatal("Error loading .env file")
 	}
 	logrus.Debug(".env file loaded")
-	http.HandleFunc("/auth/admin/login", handler.AuthenticationHandler)
+	http.HandleFunc(" /auth/admin/login", handler.AuthenticationHandler)
+	http.Handle("GET /admin/dashboard", middleware.RequestIDMiddleware(middleware.Logging(middleware.Authentication(http.HandlerFunc(handler.DashBoardHandler)))))
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		logrus.Fatal("Error in ListenAndServe")
