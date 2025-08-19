@@ -45,7 +45,7 @@ func AuthenticationHandler(w http.ResponseWriter, req *http.Request) {
 		logrus.Error("Invalid content type: ", contentType)
 		helper.SetResponseHeaders(w)
 		w.WriteHeader(http.StatusBadRequest)
-		responseBytes, err := helper.BuildBadRequestPayload(requestUuid)
+		responseBytes, err := helper.BuildBadRequestPayload(requestUuid, &model.ErrorDetails{Resource: "Login"})
 		if err != nil {
 			logrus.WithError(err).Error("Failed to marshal response")
 			return
@@ -70,7 +70,7 @@ func AuthenticationHandler(w http.ResponseWriter, req *http.Request) {
 		logrus.WithError(err).Error("Error decoding body")
 		helper.SetResponseHeaders(w)
 		w.WriteHeader(http.StatusBadRequest)
-		responseBytes, err := helper.BuildBadRequestPayload(requestUuid)
+		responseBytes, err := helper.BuildBadRequestPayload(requestUuid, &model.ErrorDetails{Resource: "Login"})
 		if err != nil {
 			logrus.WithError(err).Error("Failed to marshal response")
 			return
@@ -93,7 +93,7 @@ func AuthenticationHandler(w http.ResponseWriter, req *http.Request) {
 		logrus.WithError(err).Error("Error validating request")
 		helper.SetResponseHeaders(w)
 		w.WriteHeader(http.StatusBadRequest)
-		responseBytes, err := helper.BuildBadRequestPayload(requestUuid)
+		responseBytes, err := helper.BuildBadRequestPayload(requestUuid, &model.ErrorDetails{Resource: "Login"})
 		if err != nil {
 			logrus.WithError(err).Error("Failed to marshal response")
 			return
@@ -115,7 +115,7 @@ func AuthenticationHandler(w http.ResponseWriter, req *http.Request) {
 		logrus.Error("Invalid Credentials")
 		helper.SetResponseHeaders(w)
 		w.WriteHeader(http.StatusUnauthorized)
-		responseBytes, err := helper.BuildUnauthorizedRequestPayload(requestUuid)
+		responseBytes, err := helper.BuildUnauthorizedRequestPayload(requestUuid, &model.ErrorDetails{Resource: "Login"})
 		if err != nil {
 			logrus.WithError(err).Error("Failed to marshall response")
 			return
@@ -141,7 +141,7 @@ func AuthenticationHandler(w http.ResponseWriter, req *http.Request) {
 		logrus.WithError(err).Error("Error signing token: ")
 		helper.SetResponseHeaders(w)
 		w.WriteHeader(http.StatusInternalServerError)
-		responseBytes, err := helper.BuildInternalServerErrorPayload(requestUuid)
+		responseBytes, err := helper.BuildInternalServerErrorPayload(requestUuid, &model.ErrorDetails{Resource: "Login"})
 		if err != nil {
 			logrus.WithError(err).Error("Failed to marshal response")
 			return
