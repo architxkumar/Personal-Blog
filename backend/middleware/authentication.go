@@ -15,7 +15,7 @@ import (
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID := RetrieveRequestID(r)
-		errorDetails := &model.ErrorDetails{Resource: "Dashboard"}
+		errorDetails := &model.ErrorDetails{Resource: "AdminDashboard"}
 		tokenString, err := request.BearerExtractor{}.ExtractToken(r)
 		if err != nil {
 			logrus.Error("Missing Authorization Header")
@@ -23,11 +23,11 @@ func Authentication(next http.Handler) http.Handler {
 			return
 		}
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-			secretKey := []byte(os.Getenv("JWT_SECRET"))
-			if len(secretKey) == 0 {
+			jwtSecretBytes := []byte(jwtSecret)
+			if len(jwtSecretBytes) == 0 {
 				return nil, errors.New("environment variable not found: jwt signing key")
 			}
-			return secretKey, nil
+			return jwtSecretBytes, nil
 		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 		if err != nil {
 			logrus.Error(err)
