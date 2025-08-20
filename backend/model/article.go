@@ -15,3 +15,9 @@ type ArticlePreviewDTO struct {
 		Title string    `json:"title"`
 	} `json:"blogs"`
 }
+
+type ArticleWithoutIdDTO struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	Date    string `json:"date"`
+}

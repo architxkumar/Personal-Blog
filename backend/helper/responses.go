@@ -31,6 +31,21 @@ func BuildBadRequestPayload(requestUuid uuid.UUID, errorDetail *model.ErrorDetai
 	return responseBytes, nil
 }
 
+func BuildUnsupportedMediaTypeRequestPayload(requestUuid uuid.UUID, errorDetail *model.ErrorDetails) ([]byte, error) {
+	responseBytes, err := json.Marshal(model.ErrorResponse{Error: model.APIError{
+		Code:    "UNSUPPORTED_MEDIA_TYPE",
+		Message: "Invalid Media Format",
+		Status:  http.StatusUnsupportedMediaType,
+		TraceID: requestUuid.String(),
+		Details: errorDetail,
+	}})
+	if err != nil {
+		return responseBytes, err
+	}
+
+	return responseBytes, nil
+}
+
 func BuildInternalServerErrorPayload(requestUuid uuid.UUID, errorDetail *model.ErrorDetails) ([]byte, error) {
 	responseBytes, err := json.Marshal(model.ErrorResponse{Error: model.APIError{
 		Code:    "INTERNAL_SERVER_ERROR",
