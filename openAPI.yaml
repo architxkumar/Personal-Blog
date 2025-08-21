@@ -2,7 +2,7 @@
 openapi: 3.0.0
 info:
   title: Personal Blog API
-  version: 1.0.0
+  version: 1.1.0
   description: A simple API to manage blogs
 servers:
   - url: http://localhost:8080
@@ -28,7 +28,7 @@ paths:
                   example: admin@example.com
                 password:
                   type: string
-                  example: password
+                  example: admin
               required:
                 - email
                 - password
@@ -144,8 +144,8 @@ paths:
                       type: object
                       properties:
                         id:
-                          type: number
-                          example: 1
+                          type: string
+                          example: d6f8a753-8e77-4090-a51d-bf7e00466bc0
                           readOnly: true
                         title:
                           type: string
@@ -205,7 +205,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ArticleWithId"
         "400":
-           $ref: "#/components/responses/400ArticleBadRequest"
+          $ref: "#/components/responses/400ArticleBadRequest"
         "401":
           description: Invalid or Missing Authentication Token
           content:
@@ -248,9 +248,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ArticleWithId"
+                type: object
+                properties:
+                  blogs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ArticleWithId"
         "500":
           $ref: "#/components/responses/500"
   "/articles/{id}":
@@ -260,10 +263,9 @@ paths:
         - in: path
           name: id
           schema:
-            type: integer
-            minimum: 1
+            type: string
           required: true
-          description: Numeric ID of the article to get
+          description: Unique ID of the article to get
       security: []
       tags:
         - guest
@@ -288,8 +290,7 @@ paths:
         - in: path
           name: id
           schema:
-            type: integer
-            minimum: 1
+            type: string
           required: true
           description: Numeric ID of the article to update
       security:
@@ -323,8 +324,7 @@ paths:
         - in: path
           name: id
           schema:
-            type: integer
-            minimum: 1
+            type: string
           required: true
           description: Numeric ID of the article to update
       security:
@@ -373,8 +373,8 @@ components:
                         type: string
                         example: Article
                       id:
-                        type: integer
-                        example: 1
+                        type: string
+                        example: d6f8a753-8e77-4090-a51d-bf7e00466bc0
                   trace_id:
                     type: string
                     example: e89b1234-a456-42e4-b567-3b42dbd8e
@@ -419,7 +419,7 @@ components:
                     example: BAD_REQUEST
                   message:
                     type: string
-                    example: Id must be a valid number
+                    example: Provider a valid id
                   status:
                     type: integer
                     example: 400
@@ -430,8 +430,8 @@ components:
                         type: string
                         example: Article
                       id:
-                        type: integer
-                        example: -1
+                        type: string
+                        example: d6f8a753-8e77-4090-a51d-bf7
                   trace_id:
                     type: string
                     example: e89b1234-a456-42e4-b567-3b42dbd8e
@@ -464,8 +464,8 @@ components:
                         type: string
                         example: Article
                       id:
-                        type: integer
-                        example: 1
+                        type: string
+                        example: d6f8a753-8e77-4090-a51d-bf7e00466bc0
                   trace_id:
                     type: string
                     example: f81d4fae-7dec-11d0-a765-00a0c91e6bf6
@@ -500,10 +500,9 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           description: Identifier for an article
-          minimum: 1
-          example: 1
+          example: d6f8a753-8e77-4090-a51d-bf7e00466bc0
           readOnly: true
         title:
           type: string
